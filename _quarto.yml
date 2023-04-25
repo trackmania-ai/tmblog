@@ -3,7 +3,9 @@ project:
 
 format:
   html:
-    theme: cosmo
+    theme:
+        light: flatly
+        dark: darkly
     css: styles.css
     toc: true
 
@@ -11,14 +13,17 @@ website:
   twitter-card: true
   open-graph: true
   repo-actions: [issue]
-#  navbar:
-#    background: primary
-#    search: true
-#    left:
-#      - text: "Blog"
-#        href: blog/index.qmd
-#  sidebar:
-#    style: floating
+  navbar:
+    title: false
+    background: primary
+    left:
+      - text: "PedroAI Blog"
+        href: blog/index.qmd
+    right:
+      - text: "Stream"
+        icon: twitch
+        href: https://www.twitch.tv/pedroaitm
+
 
 metadata-files: [
   nbdev.yml,

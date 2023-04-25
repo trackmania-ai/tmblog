@@ -1,6 +1,6 @@
 ---
-title: nbdev Blog
-subtitle: News, tips, and commentary about all things nbdev
+title: PedroAI Blog
+subtitle: How to teach an AI to play the popular racing game TrackMania using Reinforcement Learning
 listing:
   sort: "date desc"
   contents: "posts"

@@ -7,6 +7,13 @@ website:
           - blog/index.qmd
           - section: posts
             contents:
-              - section: 2022-11-24-hello
+              - section: pedroai-rl
                 contents:
-                  - blog/posts/2022-11-24-hello/hello.ipynb
+                  - blog/posts/pedroai-rl/pedroai-rl.ipynb
+      - section: blog
+        contents:
+          - section: posts
+            contents:
+              - section: rl-introduction
+                contents:
+                  - blog/posts/rl-introduction/rl-introduction.ipynb
