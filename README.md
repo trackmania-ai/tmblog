@@ -9,3 +9,6 @@ to play the popular racing game
 The entire process is streamed on
 [Twitch](https://www.twitch.tv/pedroaitm) allowing viewers to watch the
 AI improve over time.
+
+Check out the [blog](http://www.trackmania.ai/blog) for more information
+!
