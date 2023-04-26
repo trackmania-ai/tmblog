@@ -13,8 +13,11 @@ website:
   twitter-card: true
   open-graph: true
   repo-actions: [issue]
+  favicon: favicon.png
   navbar:
     title: false
+    logo: logo.png
+    logo-href: /blog
     background: primary
     left:
       - text: "PedroAI Blog"
@@ -25,6 +28,4 @@ website:
         href: https://www.twitch.tv/pedroaitm
 
 
-metadata-files: [
-  nbdev.yml,
-]
+metadata-files: [nbdev.yml]
