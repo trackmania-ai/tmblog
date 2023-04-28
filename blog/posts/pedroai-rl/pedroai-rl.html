@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.340">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Pierre Porcher">
+<meta name="dcterms.date" content="2023-04-26">
+
+<title>Pedro AI - How PedroAI works</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../favicon.png" rel="icon" type="image/png">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+<meta property="og:title" content="Pedro AI - How PedroAI works">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://trackmania-ai.github.io/tmblog/blog/blog/posts/pedroai-rl/simple_training_loop.svg">
+<meta property="og:site-name" content="Pedro AI">
+<meta name="twitter:title" content="Pedro AI - How PedroAI works">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://trackmania-ai.github.io/tmblog/blog/blog/posts/pedroai-rl/simple_training_loop.svg">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a href="../../../blog" class="navbar-brand navbar-brand-logo">
+    <img src="../../../logo.png" alt="" class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html" rel="" target="">
+ <span class="menu-text">PedroAI Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.twitch.tv/pedroaitm" rel="" target=""><i class="bi bi-twitch" role="img">
+</i> 
+ <span class="menu-text">Stream</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://discord.gg/2AGH4cEAYC" rel="" target=""><i class="bi bi-discord" role="img">
+</i> 
+ <span class="menu-text">Discord</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://twitter.com/pedro_aitm" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text">Twitter</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#training-overview" id="toc-training-overview" class="nav-link active" data-scroll-target="#training-overview">Training overview</a>
+  <ul class="collapse">
+  <li><a href="#collector" id="toc-collector" class="nav-link" data-scroll-target="#collector">Collector</a>
+  <ul class="collapse">
+  <li><a href="#rl-loop" id="toc-rl-loop" class="nav-link" data-scroll-target="#rl-loop">RL loop</a></li>
+  <li><a href="#loading-maps" id="toc-loading-maps" class="nav-link" data-scroll-target="#loading-maps">Loading maps</a></li>
+  <li><a href="#exploration-strategy" id="toc-exploration-strategy" class="nav-link" data-scroll-target="#exploration-strategy">Exploration strategy</a></li>
+  </ul></li>
+  <li><a href="#replay-buffer" id="toc-replay-buffer" class="nav-link" data-scroll-target="#replay-buffer">Replay buffer</a></li>
+  <li><a href="#learner" id="toc-learner" class="nav-link" data-scroll-target="#learner">Learner</a></li>
+  </ul></li>
+  <li><a href="#target-convergence" id="toc-target-convergence" class="nav-link" data-scroll-target="#target-convergence">Target convergence</a></li>
+  <li><a href="#reward-function" id="toc-reward-function" class="nav-link" data-scroll-target="#reward-function">Reward function</a>
+  <ul class="collapse">
+  <li><a href="#trackmania-naive-reward-function" id="toc-trackmania-naive-reward-function" class="nav-link" data-scroll-target="#trackmania-naive-reward-function">Trackmania naive reward function</a></li>
+  <li><a href="#pedroai-reward-function" id="toc-pedroai-reward-function" class="nav-link" data-scroll-target="#pedroai-reward-function">PedroAI reward function</a>
+  <ul class="collapse">
+  <li><a href="#progress-on-reference-trajectory" id="toc-progress-on-reference-trajectory" class="nav-link" data-scroll-target="#progress-on-reference-trajectory">Progress on reference trajectory</a></li>
+  <li><a href="#completing-the-map" id="toc-completing-the-map" class="nav-link" data-scroll-target="#completing-the-map">Completing the map</a></li>
+  <li><a href="#mistake-state" id="toc-mistake-state" class="nav-link" data-scroll-target="#mistake-state">Mistake state</a></li>
+  <li><a href="#respawn-or-end-round" id="toc-respawn-or-end-round" class="nav-link" data-scroll-target="#respawn-or-end-round">Respawn or end round</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/trackmania-ai/tmblog/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">How PedroAI works</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Pierre Porcher </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 26, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>Here you will learn how the deep reinforcement learning project <a href="?var:stream">PedroAI</a> works. The project features an AI learning to play the popular racing game <a href="?var:trackmania">Trackmania</a>. The entire process is streamed on <a href="?var:stream">Twitch</a> allowing viewers to watch the AI improve over time.</p>
+<p>This article is the second of a two-part series where we first learn about deep reinforcement learning basics before diving deeper into the specificities of the <a href="?var:stream">PedroAI</a> project.</p>
+<ul>
+<li><a href="../rl-introduction/rl-introduction.html">Introduction to Deep Reinforcement Learning (Trackmania AI POV)</a></li>
+<li>How PedroAI works</li>
+</ul>
+<p>A third article about the technical details of <a href="?var:stream">PedroAI</a> is being written as you read this.</p>
+<p>Here we will describe the project at a high level and not go into technical details about the implementation. Let’s start with an overview of the training.</p>
+<section id="training-overview" class="level1">
+<h1>Training overview</h1>
+<p>PedroAI uses the Deep Q-Learning (DQN) algorithm with a few adaptations. It features 4 workers: 3 environments that collect experiences (the 3 games you see on <a href="?var:stream">stream</a>) and one learner that trains the AI neural network. They all share a common replay buffer. The 3 environments send their experiences to this buffer. The learner samples it and builds batches of experiences to learn from them.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="simple_training_loop.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">PedroAI training loop</figcaption>
+</figure>
+</div>
+<section id="collector" class="level2">
+<h2 class="anchored" data-anchor-id="collector">Collector</h2>
+<p>The main role of the collector is to execute the reinforcement learning loop (RL loop) to collect experiences. An experience is composed of a state, an action, a reward, and the next state. The collector also loads Trackmania maps and cycle exploration strategies.</p>
+<section id="rl-loop" class="level3">
+<h3 class="anchored" data-anchor-id="rl-loop">RL loop</h3>
+<p>After loading a map, the collector start to execute the RL loop. For the PedroAI project it looks like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="rl_loop_detailed.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">PedroAI collector</figcaption>
+</figure>
+</div>
+<p>In practice, the collector peforms the following actions in sequence:</p>
+<style>
+ol.redcircle {
+  counter-reset: item; /*Remove default style*/
+  list-style-type: none;
+  padding-left: 20px; /*space between the block and the number*/
+}
+
+li.redcircle {
+  display: block;
+}
+
+li.redcircle:before {
+  background-color: red;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  margin-right: 4px;
+  padding-left: 4px;
+  content: counter(item) "  ";
+  counter-increment: item
+}
+</style>
+<ol class="redcircle">
+<li class="redcircle">
+Read current state (or use next state from step 6):
+<ul>
+<li>
+Screenshot the game window for visual data
+</li>
+<li>
+Read telemetry data (speed, rpm, wheel angle … and many more)
+</li>
+<li>
+Compute reference trajectory data in the frame of reference of the car
+</li>
+</ul>
+</li>
+<li class="redcircle">
+Score each possible action with the neural network
+</li>
+<li class="redcircle">
+Pick an action
+</li>
+<li class="redcircle">
+Apply the action in game
+</li>
+<li class="redcircle">
+Wait 100ms, this is the default timestep
+</li>
+<li class="redcircle">
+Read the next state
+</li>
+<li class="redcircle">
+Compute the reward
+</li>
+<li class="redcircle">
+Send the sequence (state, action, reward, next state) to the replay buffer
+</li>
+</ol>
+</section>
+<section id="loading-maps" class="level3">
+<h3 class="anchored" data-anchor-id="loading-maps">Loading maps</h3>
+<p>A collector loads a new map every session, i.e., every 10 rounds. The goal is to frequently show different environments to the AI. This helps generalization and makes the AI better when confronted to unseen maps.</p>
+</section>
+<section id="exploration-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="exploration-strategy">Exploration strategy</h3>
+<p>The exploration strategy changes every round across a session. These strategies have an impact on step “3) Pick an action” of the RL loop. The agent doesn’t always take the optimal action acording to its neural network. Sometimes it takes action at random. The goal is to prevent the agent from always driving the same way and let it discover new trajectories.</p>
+<p>PedroAI uses 3 differents strategies: Greedy, Epsilon-greedy and Rank Boltzmann exploration.</p>
+<ul>
+<li>Greedy: The agent always takes the optimal action according to its neural network.</li>
+<li>Epsilon-greedy: The agent does random exploration occasionally with probability ε and takes the optimal action most of the time with probability 1 - ε.</li>
+<li>Rank Boltzmann exploration: The agent draws actions from a Boltzmann distribution (softmax) over the rank of each action, regulated by a temperature parameter τ. In other words, the neural network scores each possible actions, then they are ranked starting with the lowest value. Finally, we apply a softmax on these rank and draw from the resulting probability distribution.</li>
+</ul>
+</section>
+</section>
+<section id="replay-buffer" class="level2">
+<h2 class="anchored" data-anchor-id="replay-buffer">Replay buffer</h2>
+<p>The replay buffer is the memory of the AI. Experiences (state, action, reward, next state) collected by the collectors are stored in this buffer. It enables “experience replay”. The learner sample the buffer randomly to build batches of experiences and “replays” them to train the neural network.</p>
+<p>PedroAI employ a Prioritized Experience Replay, meaning that each experience is associated with a priority. The priority value corresponds to the error the AI makes when it tries to score this experience. The more the AI is wrong about an experience, the more it is likely to sample this experience again, learn from it, and correct its estimation.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="replay_buffer_with_priorities.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Replay buffer with priorities</figcaption>
+</figure>
+</div>
+</section>
+<section id="learner" class="level2">
+<h2 class="anchored" data-anchor-id="learner">Learner</h2>
+<p>In the PedroAI project, the learner is independent of the collectors, this is a separate worker. Its loop looks like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="learner_loop.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">PedroAI learner</figcaption>
+</figure>
+</div>
+<ol class="redcircle">
+<li class="redcircle">
+Sample the replay buffer to create a batch
+</li>
+<li class="redcircle">
+Fit one batch to estimate the Q values
+</li>
+<li class="redcircle">
+Compare the Q values estimation with the target Q values to compute an error for each experience in the batch
+</li>
+<li class="redcircle">
+Update the neural network weights in order to produce smaller errors next time
+</li>
+<li class="redcircle">
+Update the priorities of the replay buffer using the error values
+</li>
+</ol>
+<p>As we have seen in the <a href="../rl-introduction/rl-introduction.html#the-deep-in-reinforcement-learning">previous article</a>, PedroAI uses Deep Q-Learning. Its neural network estimates the expected return of a state for each action it could take.</p>
+<p>During step 3), the learner compares the neural network Q values estimates with target values. Target values are the true expected return values for each action (or rather an approximation of the true value, more on this later). Then, the learner adjusts the neural network weights to make the Q value estimation closer to the target values.</p>
+<p>The difference between the estimation and target value, the error, is then used to update replay buffer priorities at step 5).</p>
+<p>It is important to note that the neural network estimates the expected return directly and not only the reward between current and next state. It means that with one state, it estimates the expected discounted cumulative reward that takes into account all future rewards.</p>
+<p>The neural network tries to estimates this value for each action possible:</p>
+<p><img src="action_value_function.svg" class="img-fluid"></p>
+<p>But how can AI pull this trick and estimate the expected return directly with one state ? We will find out in the next chapter.</p>
+<p>Before we move on, here is the complete diagram of PedroAI’s training loop:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="complete_loop.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Detailed PedroAI training loop</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="target-convergence" class="level1">
+<h1>Target convergence</h1>
+<p>At the beginning of the training, the AI estimates the expected discounted cumulative rewards, or Q values, for each action randomly (depending of the random initialisation of the neural network weights).</p>
+<p><img src="initial_nn_estimation.svg" class="img-fluid"></p>
+<p>Q value estimations are represented with orange bars, they are blured to show randomness.</p>
+<p>When learning from an experience (state S<sub>t</sub>, action A<sub>t</sub>, reward R<sub>t</sub>, next_state S<sub>t+1</sub>) the AI compares its Q value estimation with the target Q value.</p>
+<p><img src="targetq_comparison.svg" class="img-fluid"></p>
+<p>But how do we compute the target Q value that takes into account all future rewards only from reward R<sub>t</sub> and next_state S<sub>t+1</sub> ? Here we are looking for the true Q value, the value with which the neural network will compare its own estimation to learn. We can’t get this exact value directly from a reward and a next_state, right ?</p>
+<p>Right! We don’t compute this exact value, but we compute an approximation of it using our own neural network again, this time on next_state S<sub>t+1</sub> and selecting the action with the highest Q value. Then we discount this value by ɣ and add the reward R<sub>t</sub>. If it is not clear yet, have a look at the following diagram:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="target_q_value_computation.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Target Q value from next_state S<sub>t+1</sub> and reward R<sub>t</sub></figcaption>
+</figure>
+</div>
+<p>This computation takes advantage of the following factorization of state S<sub>t</sub> Q value:</p>
+<p><img src="q_value_factorization.svg" class="img-fluid"></p>
+<p>The target Q value is still wrong because it uses the neural network to compute part of it. However, it is a little bit less wrong because the other part is computed with the actual reward of this experience.</p>
+<p><img src="target_q_value_wrongness.svg" class="img-fluid"></p>
+<p>When the neural network compare its Q value estimation with the target Q value and updates its weights, it makes a step in the right direction, making its estimation a little bit better for next time. After many iterations, the neural network converges to estimate the actual Q values.</p>
+<p>In the next chapter, we will have a look at PedroAI’s reward function defining what reward is given to the AI exactly.</p>
+</section>
+<section id="reward-function" class="level1">
+<h1>Reward function</h1>
+<p>As we have seen <a href="../rl-introduction/rl-introduction.html#the-reward-hypothesis-the-central-idea-of-reinforcement-learning">previously</a>, the goal of any RL agent is to maximize its expected cumulative reward. PedroAI is no exception. We have to define a reward function that gives the AI a reward at each step. The AI will then try to maximise its expected return (expected cumulative reward).</p>
+<section id="trackmania-naive-reward-function" class="level2">
+<h2 class="anchored" data-anchor-id="trackmania-naive-reward-function">Trackmania naive reward function</h2>
+<p>The true objective of Trackmania is to complete a map in the minimum amount of time possible. A straightforward reward function would be to reward the AI when it finishes a map with a reward inversly proportional to the time it took.</p>
+<p>The issue with this reward function is that it is way to sparse. At the start of training, the AI knows nothing about its environment and all actions are taken randomly. The AI will have to wander the map for ages before finishing the map even once and start learning something.</p>
+<p><video src="random_input.webm" class="img-fluid" controls=""><a href="random_input.webm">Video</a></video></p>
+<p>Even if the AI manages to finish a map regularly, it will be very diffcult for it to know what went well and what went wrong in the run. What turn it took well and what turn it took poorly ?</p>
+<p>We have to define a better reward function for training.</p>
+</section>
+<section id="pedroai-reward-function" class="level2">
+<h2 class="anchored" data-anchor-id="pedroai-reward-function">PedroAI reward function</h2>
+<p>PedroAI defines a reward function that gives feedback at each step. The challenge is to find a dense reward function that is a good proxy for the true objective “complete the map in the minimum amount of time”.</p>
+<p>Using a reference trajectory (author or wr), the AI gets a positive reward for:</p>
+<ul>
+<li>making progress on the reference trajectory</li>
+<li>completing the map</li>
+</ul>
+<p>It gets a negative reward for:</p>
+<ul>
+<li>being in a mistake state (too far from reference trajectory or not making progress)</li>
+<li>respawning or ending the round without completing the map (happens when the AI is in a mistake state for too long)</li>
+</ul>
+<p>Let’s go into more detail on each of these points.</p>
+<section id="progress-on-reference-trajectory" class="level3">
+<h3 class="anchored" data-anchor-id="progress-on-reference-trajectory">Progress on reference trajectory</h3>
+<p>Progress at each step is the length of completed trajectory between previous and current state. The car position is projected to the trajectory to compute this length.</p>
+<p><img src="trajectory.png" style="border-radius:10px; width:100%"></p>
+<p>Then the AI gets rewarded as follow :</p>
+<p><img src="completed_trajectory_reward.svg" class="img-fluid"></p>
+<p>In other words, the AI is rewarded for the speed at which it completes the reference trajectory. If the AI would be following the reference trajectory perfectly at a constant speed this reward would simplify to :</p>
+<p><img src="speed_reward.svg" class="img-fluid"></p>
+<p>Will the AI be able to do better than the reference trajectory ? Yes, it will! Consider the following reference trajectory:</p>
+<p><img src="poor_trajectory.png" style="border-radius:10px; width:100%"></p>
+<p>The AI will make more progess faster if it goes straight and doesn’t zigzag.</p>
+<p><img src="poor_trajectory_straight.png" style="border-radius:10px; width:100%"></p>
+<p>Even a poor trajectory will help the AI learn to play well.</p>
+<p>Finally, the farther the car is from the trajectory, the more this reward is discounted. It helps the AI not wander too long on the wrong path. If the AI is closer than 10 meters, the reward is not discounted. After that, the reward is discounted linearly.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>discount_threshold <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>max_distance <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">@np.vectorize</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> distance_discount(distance):</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> distance <span class="op">&lt;</span> discount_threshold:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">1.0</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> max_distance <span class="op">&lt;</span> distance:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">0.0</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">1.0</span> <span class="op">-</span> (distance <span class="op">-</span> discount_threshold) <span class="op">/</span> (max_distance <span class="op">-</span> discount_threshold)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="dv">0</span>, max_distance <span class="op">*</span> <span class="fl">1.1</span>, <span class="dv">100</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"distance to reference trajectory (m)"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"reward multiplier"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>plt.plot(x, distance_discount(x))</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-discount" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="pedroai-rl_files/figure-html/fig-discount-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Distance discount</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="completing-the-map" class="level3">
+<h3 class="anchored" data-anchor-id="completing-the-map">Completing the map</h3>
+<p>Completing the map gives the AI a bigger reward. We have to make this reward big because the AI won’t get further reward after finishing the map. If this reward is too low, the risk is that during training, the AI prefer to miss the finish in the hope to get more reward later.</p>
+<p>PedroAI tackles this issue by giving the AI a reward equivalent to its expected return if it were to follow a reference trajectory perfectly at its current speed.</p>
+<p>Remember that the expected return, or expected cumulative reward is computed as follows:</p>
+<p><img src="reward_gamma_sum.svg" class="img-fluid"></p>
+<p>PedroAI’s formula for map completion reward is:</p>
+<p><img src="map_completion_reward.svg" class="img-fluid"></p>
+<p>This way, the finish reward is almost always larger than what the AI might expect if it was still driving along a trajectory. Additionally, it incentivise the AI to cross the finish line with maximum speed.</p>
+<p>This approach generally results in faster completion times, but there is a drawback in that the AI may sometimes choose longer routes to gain more speed before finishing.</p>
+</section>
+<section id="mistake-state" class="level3">
+<h3 class="anchored" data-anchor-id="mistake-state">Mistake state</h3>
+<p>The AI gets a small penalty for being in a mistake state. There are two possible mistakes:</p>
+<ul>
+<li>Being too far from the trajectory: the distance between the car and his projection on the reference trajectory is more than 50 meters.</li>
+<li>Not making progress on the reference trajecory: the car already got farther on the trajectory before during the round.</li>
+</ul>
+<p>PedroAI gives a penalty of ≈14 points, which correspond to the amount of point the AI would get if it was driving at 50km/h following the reference trajectory. I tuned this value and found out that -14 yields the best results.</p>
+</section>
+<section id="respawn-or-end-round" class="level3">
+<h3 class="anchored" data-anchor-id="respawn-or-end-round">Respawn or end round</h3>
+<p>If the AI is in a mistake state for more than 4 seconds, it respawns.</p>
+<p>From the point of vue of the AI, that is where the round ends; it doesn’t know that it is instead only respawning. For those familiar with reinforcement learning, this is the end of the episode, but for the in-game round and my satistics, this is only a respawn.</p>
+<p>If the AI respawns 4 times on the same checkpoint and finds itself in a mistake state for more than 4 seconds again, it will end the round for good.</p>
+<p>Similar to map completion reward, when the AI must respawn or end the round, PedroAI gives it the expected return if the AI where to stay in a mistake state indefinitely.</p>
+<p><img src="respawn_reward.svg" class="img-fluid"></p>
+<p>Now, you should have a better understanding of how PedroAI works. In summary:</p>
+<ul>
+<li>PedroAI uses an adapted version of Deep Q-Learning with four seperate workers, three to collect experiences and one to learn from those experiences.</li>
+<li>The neural network estimates the expected discounted cumulative rewards directly with one state. It doesn’t need to predict everything that will happen in the future. When learning, the trick is to reuse the neural network on the next state to estimate the future rewards.</li>
+<li>The true Trackmania reward “complete the map in the minimum amount of time possible” is too sparse for reinforcement learning. PedroAI uses a denser reward function leveraging author or wr trajectory.</li>
+</ul>
+<p>Stay tuned for the third blog post in this series where I present the technical details of the project: neural network architecture, frameworks, telemtry data gathering, and more … I am still working on it 🤓</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

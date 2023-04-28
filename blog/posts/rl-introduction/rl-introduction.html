@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.340">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Pierre Porcher">
+<meta name="dcterms.date" content="2023-04-25">
+
+<title>Pedro AI - Introduction to Deep Reinforcement Learning (Trackmania AI POV)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../favicon.png" rel="icon" type="image/png">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+<meta property="og:title" content="Pedro AI - Introduction to Deep Reinforcement Learning (Trackmania AI POV)">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://trackmania-ai.github.io/tmblog/blog/blog/posts/rl-introduction/sister_start.png">
+<meta property="og:site-name" content="Pedro AI">
+<meta property="og:image:height" content="1080">
+<meta property="og:image:width" content="1920">
+<meta name="twitter:title" content="Pedro AI - Introduction to Deep Reinforcement Learning (Trackmania AI POV)">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://trackmania-ai.github.io/tmblog/blog/blog/posts/rl-introduction/sister_start.png">
+<meta name="twitter:image-height" content="1080">
+<meta name="twitter:image-width" content="1920">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a href="../../../blog" class="navbar-brand navbar-brand-logo">
+    <img src="../../../logo.png" alt="" class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog/index.html" rel="" target="">
+ <span class="menu-text">PedroAI Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.twitch.tv/pedroaitm" rel="" target=""><i class="bi bi-twitch" role="img">
+</i> 
+ <span class="menu-text">Stream</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://discord.gg/2AGH4cEAYC" rel="" target=""><i class="bi bi-discord" role="img">
+</i> 
+ <span class="menu-text">Discord</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://twitter.com/pedro_aitm" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text">Twitter</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-is-reinforcement-learning" id="toc-what-is-reinforcement-learning" class="nav-link active" data-scroll-target="#what-is-reinforcement-learning">What is Reinforcement Learning?</a>
+  <ul class="collapse">
+  <li><a href="#the-big-picture" id="toc-the-big-picture" class="nav-link" data-scroll-target="#the-big-picture">The big picture</a></li>
+  <li><a href="#a-formal-definition" id="toc-a-formal-definition" class="nav-link" data-scroll-target="#a-formal-definition">A formal definition</a></li>
+  </ul></li>
+  <li><a href="#the-reinforcement-learning-framework" id="toc-the-reinforcement-learning-framework" class="nav-link" data-scroll-target="#the-reinforcement-learning-framework">The Reinforcement Learning Framework</a>
+  <ul class="collapse">
+  <li><a href="#the-rl-process" id="toc-the-rl-process" class="nav-link" data-scroll-target="#the-rl-process">The RL Process</a></li>
+  <li><a href="#the-reward-hypothesis-the-central-idea-of-reinforcement-learning" id="toc-the-reward-hypothesis-the-central-idea-of-reinforcement-learning" class="nav-link" data-scroll-target="#the-reward-hypothesis-the-central-idea-of-reinforcement-learning">The reward hypothesis: the central idea of Reinforcement Learning</a></li>
+  <li><a href="#rewards-and-the-discounting" id="toc-rewards-and-the-discounting" class="nav-link" data-scroll-target="#rewards-and-the-discounting">Rewards and the discounting</a></li>
+  <li><a href="#explorationexploitation-tradeoff" id="toc-explorationexploitation-tradeoff" class="nav-link" data-scroll-target="#explorationexploitation-tradeoff">Exploration/Exploitation tradeoff</a></li>
+  <li><a href="#how-to-solve-reinforcement-learning-problems" id="toc-how-to-solve-reinforcement-learning-problems" class="nav-link" data-scroll-target="#how-to-solve-reinforcement-learning-problems">How to solve Reinforcement Learning problems</a></li>
+  <li><a href="#the-policy-π-the-agents-brain" id="toc-the-policy-π-the-agents-brain" class="nav-link" data-scroll-target="#the-policy-π-the-agents-brain">The Policy π: the agent’s brain</a></li>
+  <li><a href="#value-based-methods" id="toc-value-based-methods" class="nav-link" data-scroll-target="#value-based-methods">Value-based methods</a></li>
+  <li><a href="#the-deep-in-reinforcement-learning" id="toc-the-deep-in-reinforcement-learning" class="nav-link" data-scroll-target="#the-deep-in-reinforcement-learning">The “Deep” in Reinforcement Learning</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/trackmania-ai/tmblog/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Introduction to Deep Reinforcement Learning (Trackmania AI POV)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Pierre Porcher </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 25, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>Welcome to the wonderful land of Deep Reinforcement Learning, a hot topic in Artifical Intelligence.</p>
+<p>Deep RL is a type of Machine Learning where an agent learns how to behave in an environment by performing actions and looking at the results.</p>
+<p>In this blog post, we will explore the basics of deep reinforcement learning. We will focus on what <a href="?var:stream">PedroAI</a> project uses. The project features an AI learning to play the popular racing game <a href="?var:trackmania">Trackmania</a>. The entire process is streamed on <a href="?var:stream">Twitch</a> allowing viewers to watch the AI improve over time.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We will be introducing some key concepts about deep reinforcement learning that are used by PedroAI. For a more in-depth introduction to deep reinforcement learning, I recommend checking out <a href="https://huggingface.co/learn/deep-rl-course/unit1/introduction">this blog post</a> from Thomas Simonini and Omar Sanseviero. The current post is heavily inspired by their work.</p>
+</div>
+</div>
+<p>This article is the first of a two-part series where we first learn about deep reinforcement learning basics before diving deeper into the specificities of the <a href="?var:stream">PedroAI</a> project.</p>
+<ul>
+<li>Introduction to Deep Reinforcement Learning (Trackmania AI POV)</li>
+<li><a href="../pedroai-rl/pedroai-rl.html">How PedroAI works</a></li>
+</ul>
+<p>A third article about the technical details of <a href="?var:stream">PedroAI</a> is being written as you read this.</p>
+<section id="what-is-reinforcement-learning" class="level1">
+<h1>What is Reinforcement Learning?</h1>
+<p>To understand Reinforcement Learning, let’s start with the big picture.</p>
+<section id="the-big-picture" class="level2">
+<h2 class="anchored" data-anchor-id="the-big-picture">The big picture</h2>
+<p>The idea behind Reinforcement Learning is that an agent will learn from the environment by interacting with it through trial and error and receiving rewards, negative or positive, as feedback for performing actions.</p>
+<p>Imagine putting your little sister in front of a slightly modified version of Trackmania where crossing a checkpoint or the finish line gives you one point but falling in the water substracts one point. You put a controller in her hands and let her alone.</p>
+<p><img src="sister_start.png" alt="Sister at the start of a Trackmania map" style="border-radius:10px; width:100%"></p>
+<p>Your sister will interact with the environment, the Trackmania game, by pressing the forward trigger (action). She got a checkpoint, that’s a +1 reward. It’s positive, she just understood that in this game she must get checkpoints.</p>
+<p><img src="sister_positive.png" alt="Sister gets +1 rewards after crossing a checkpoint" style="border-radius:10px; width:100%"></p>
+<p>She continues to press forward but presses left too late to take the turn and falls in the water, that’s -1 reward.</p>
+<p><img src="sister_negative.png" alt="Sister gets -1 rewards after falling in the water" style="border-radius:10px; width:100%"></p>
+<p>By interacting with her environment, through trial and error, your little sister understood that, in this environment, she must take checkpoints and not fall.</p>
+<p>Without any supervision, your sister will get better and better at playing the game.</p>
+<p>That’s how humans and animals learn, through interaction. Reinforcement Learning is just a computational approach of learning from action.</p>
+</section>
+<section id="a-formal-definition" class="level2">
+<h2 class="anchored" data-anchor-id="a-formal-definition">A formal definition</h2>
+<p>If we take now a formal definition:</p>
+<blockquote class="blockquote">
+<p>Reinforcement learning is a framework for solving control tasks, also called decision problems, by building agents that learn from the environment by interacting with it through trial and error and receiving rewards, positive or negative, as unique feedback.</p>
+</blockquote>
+<p>But how does Reinforcement Learning work?</p>
+</section>
+</section>
+<section id="the-reinforcement-learning-framework" class="level1">
+<h1>The Reinforcement Learning Framework</h1>
+<section id="the-rl-process" class="level2">
+<h2 class="anchored" data-anchor-id="the-rl-process">The RL Process</h2>
+<p>The RL Process is a loop of state, action, reward and next state:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="rl_loop.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">The RL Process loop</figcaption>
+</figure>
+</div>
+<p>To understand the RL process, let’s consider PedroAI learning to play Trackmania:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="rl_loop_tm.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">The RL Process loop with Trackmania</figcaption>
+</figure>
+</div>
+<ul>
+<li>The Agent receives state S<sub>0</sub> from the Environment, the first frame of the game.</li>
+<li>Based on that state S<sub>0</sub>, the agent takes action A<sub>0</sub>, the car will go forward.</li>
+<li>The Environment goes to a new state S<sub>1</sub>, a new frame.</li>
+<li>The Environment gives some reward R<sub>1</sub>.</li>
+</ul>
+<p>This RL loop outputs a sequence of state, action, reward and next state.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="sars.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>The agent’s goal is to maximize its cumulative reward, called return.</p>
+</section>
+<section id="the-reward-hypothesis-the-central-idea-of-reinforcement-learning" class="level2">
+<h2 class="anchored" data-anchor-id="the-reward-hypothesis-the-central-idea-of-reinforcement-learning">The reward hypothesis: the central idea of Reinforcement Learning</h2>
+<p>Reinforcement Learning is based on the reward hypothesis, which is that all goals can be described as the maximization of the return (cumulative reward). In Reinforcement Learning, to have the best behavior, we need to maximize the return.</p>
+</section>
+<section id="rewards-and-the-discounting" class="level2">
+<h2 class="anchored" data-anchor-id="rewards-and-the-discounting">Rewards and the discounting</h2>
+<p>The reward is fundamental in RL because it’s the only feedback the agent gets. It enables the agent to know if the action taken was good or not.</p>
+<p>The cumulative reward at each time step t can be written as:</p>
+<p><img src="reward.svg" class="img-fluid"></p>
+<p>Wich is equivalent to:</p>
+<p><img src="reward_sum.svg" class="img-fluid"></p>
+<p>Now imagine you want to calculate the expected return of a state. You want to know the cumulative reward you can expect to get given your current state.</p>
+<p>You could sum all the reward you expect to get in the future until the end of the run. However, in practice, the rewards that come sooner are more likely to happen since they are more predictable than the long-term future reward. That is why we introduce a discount rate for future potential rewards.</p>
+<p>Let’s say your agent is at the start of the following track. Your goal is to cross the maximum number of checkpoints before falling off the road.</p>
+<p><img src="discount_track.png" style="border-radius:10px; width:100%"></p>
+<p>It’s more probable to cross the checkpoints near your position than the ones close to the finish. The farther a checkpoint is from your position, the more likely it is to fall off before getting it.</p>
+<p>Consequently, the reward given for crossing a checkpoint far away is discounted more. We are not sure we’ll be able to cross the far away checkpoint.</p>
+<p>In practice, to discount the rewards, we proceed like this:</p>
+<ol type="1">
+<li>We define a discount rate called gamma. It must be between 0 and 1. Most of the time between 0.99 and 0.90.</li>
+</ol>
+<ul>
+<li><p>The larger the gamma, the smaller the discount. This means our agent cares more about the long-term reward.</p></li>
+<li><p>On the other hand, the smaller the gamma, the bigger the discount. This means our agent cares more about the short term reward (the nearest checkpoints here).</p></li>
+</ul>
+<ol start="2" type="1">
+<li>Then, each reward will be discounted by gamma to the exponent of the time step. As the time step increases, the car will have more opportunities to fall off, so the future reward is less and less likely to happen.</li>
+</ol>
+<p>The discounted cumulative reward can be written as:</p>
+<p><img src="reward_gamma.svg" class="img-fluid"></p>
+<p>Or:</p>
+<p><img src="reward_gamma_sum.svg" class="img-fluid"></p>
+</section>
+<section id="explorationexploitation-tradeoff" class="level2">
+<h2 class="anchored" data-anchor-id="explorationexploitation-tradeoff">Exploration/Exploitation tradeoff</h2>
+<p>Before looking at how to solve Reinforcement Learning problems, we must cover a very important topic: the exploration/exploitation trade-off.</p>
+<ul>
+<li><p>Exploration is exploring the environment by trying random actions in order to find more information about the environment.</p></li>
+<li><p>Exploitation is exploiting known information to maximize the reward.</p></li>
+</ul>
+<p>Remember, the goal of our RL agent is to maximize the expected cumulative reward. However, we can fall into a common trap.</p>
+<p>Let’s take an example:</p>
+<p><img src="exploration_track.png" style="border-radius:10px; width:100%"></p>
+<p>Here our RL agent is rewarded for reaching the finish line fast. The faster it cross the finish line, the more reward it gets.</p>
+<p>Now consider that our RL agent learnt that going forward in a straight line is a good way to reach its destination if there is no obstacle in between. The agent will always take the road on the left and never try the road on the right even if the right road is actually faster (exploitation).</p>
+<p>But if our agent does a little bit of exploration and try the road on the right, it will discover a faster route that yields a bigger reward (exploration).</p>
+<p>This is what we call the exploration/exploitation trade-off. We need to balance how much we explore the environment and how much we exploit what we know about the environment.</p>
+<p>Therefore, we must define a rule that helps to handle this trade-off. We’ll see in future post how PedroAI handles this trade-off.</p>
+</section>
+<section id="how-to-solve-reinforcement-learning-problems" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-solve-reinforcement-learning-problems">How to solve Reinforcement Learning problems</h2>
+<p>In other words, how to build an RL agent that can select the actions that maximize its expected cumulative reward?</p>
+</section>
+<section id="the-policy-π-the-agents-brain" class="level2">
+<h2 class="anchored" data-anchor-id="the-policy-π-the-agents-brain">The Policy π: the agent’s brain</h2>
+<p>The Policy π is the brain of our agent. It’s the function that tells us what action to take given the state we are in. So, it defines the agent’s behavior at a given time.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="policy.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Policy π</figcaption>
+</figure>
+</div>
+<p>This policy is the function we want to learn. Our goal is to find the optimal policy π, the policy that maximizes expected return when the agent acts according to it. We find this π through training.</p>
+<p>There are two approaches to train our agent to find this optimal policy π*:</p>
+<ul>
+<li>Directly, by teaching the agent to learn which action to take given the state it is in: Policy-Based Methods. We will not discuss this method here, see https://huggingface.co/blog/deep-rl-intro#policy-based-methods for more information.</li>
+<li>Indirectly, teach the agent to learn which state is more valuable and then take the action that leads to the more valuable states: Value-Based Methods. This is the method PedroAI uses.</li>
+</ul>
+</section>
+<section id="value-based-methods" class="level2">
+<h2 class="anchored" data-anchor-id="value-based-methods">Value-based methods</h2>
+<p>In value-based methods, instead of training a policy function, we train a value function that maps a state to the expected value of being at that state.</p>
+<p>The value of a state is the expected discounted return the agent can get if it starts in that state, and then act according to our policy.</p>
+<p>“Act according to our policy” just means that our policy is “going to the state with the highest value”.</p>
+<p><img src="value_function.svg" class="img-fluid"></p>
+<p>Here we see that our value function defined value for each possible state.</p>
+<p><img src="state_value.svg" class="img-fluid"></p>
+<p>Thanks to our value function, at each step our policy will select the state with the biggest value defined by the value function: -8, then -7, then -6 (and so on) to attain the goal.</p>
+</section>
+<section id="the-deep-in-reinforcement-learning" class="level2">
+<h2 class="anchored" data-anchor-id="the-deep-in-reinforcement-learning">The “Deep” in Reinforcement Learning</h2>
+<p>⇒ What we’ve talked about so far is Reinforcement Learning. But where does the “Deep” come into play?</p>
+<p>Deep Reinforcement Learning introduces deep neural networks to solve Reinforcement Learning problems — hence the name “deep”.</p>
+<p>For instance, PedroAI uses Deep Q-Learning. It uses a Neural Network to approximate the expected value of a state for each action it could take.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="deep_q_network.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Deep Q learning for Trackmania</figcaption>
+</figure>
+</div>
+<p>If you want to learn about deep learning in general, not only reinforcement learning, you should definitely watch <a href="https://course.fast.ai">the fastai Practical Deep Learning for Coders (Free)</a>.</p>
+<p>That was a lot of information, if we summarize:</p>
+<ul>
+<li><p>Reinforcement Learning is a computational approach of learning from action. We build an agent that learns from the environment by interacting with it through trial and error and receiving rewards, negative or positive, as feedback.</p></li>
+<li><p>The goal of any RL agent is to maximize its expected cumulative reward (also called expected return) because RL is based on the reward hypothesis, which is that all goals can be described as the maximization of the expected cumulative reward.</p></li>
+<li><p>The RL process is a loop that outputs a sequence of state, action, reward and next state.</p></li>
+<li><p>To calculate the expected cumulative reward (expected return), we discount the rewards: the rewards that come sooner (at the beginning of the game) are more probable to happen since they are more predictable than the long-term future reward.</p></li>
+<li><p>To solve an RL problem, you want to find an optimal policy, the policy is the “brain” of your AI that will tell us what action to take given a state. The optimal one is the one who gives you the actions that maximize the expected return.</p></li>
+<li><p>There are two ways to find your optimal policy:</p>
+<ol type="1">
+<li>By training your policy directly: policy-based methods.</li>
+<li>By training a value function that tells us the expected return the agent will get at each state and use this function to define our policy: value-based methods.</li>
+</ol></li>
+<li><p>Finally, we speak about Deep RL because we introduce deep neural networks to estimate the value of a state hence, the name “deep”.</p></li>
+</ul>
+<p>I encourage you to read the next blog post in this series <a href="../pedroai-rl/pedroai-rl.html">How PedroAI works</a>.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
