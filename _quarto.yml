@@ -26,6 +26,12 @@ website:
       - text: "Stream"
         icon: twitch
         href: https://www.twitch.tv/pedroaitm
+      - text: "Discord"
+        icon: discord
+        href: https://discord.gg/2AGH4cEAYC
+      - text: "Twitter"
+        icon: twitter
+        href: https://twitter.com/pedro_aitm
 
 
 metadata-files: [nbdev.yml]
